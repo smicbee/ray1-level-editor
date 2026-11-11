@@ -4,6 +4,25 @@ Unofficial visual level editor for **Rayman 1 (PC / DOS version, e.g. GOG "Rayma
 
 > **Disclaimer.** This is an unofficial fan tool. It is not affiliated with, endorsed by or connected to Ubisoft. *Rayman* is a trademark of Ubisoft Entertainment. **This repository contains no game files** (no levels, graphics, sounds or executables). You need your own legally purchased copy of the game; the editor works on a copy of its `PCMAP` folder.
 
+## Screenshots
+
+![Level overview (Jungle) with background and objects](docs/screenshots/01-overview-jungle.png)
+*Level overview (Jungle) with background layer and object boxes.*
+
+![Object property panel](docs/screenshots/02-object-property-panel.png)
+*A selected object with the grouped, labeled property panel and its command script.*
+
+![Script preview](docs/screenshots/03-script-preview-path.png)
+*Approximate script preview: path overlay and the currently executed command highlighted.*
+
+![Zoom 400% with collision overlay](docs/screenshots/04-zoom-400-collision.png)
+*Zoomed to 400 % with the collision overlay.*
+
+![Mountain world](docs/screenshots/05-mountain-world.png)
+*Another world (Mountain) with objects and link lines.*
+
+*The screenshots show game graphics from Rayman (© Ubisoft) solely to illustrate the editor.*
+
 ## Features
 
 - Tile map view with the real tile graphics and palette; **tile painting** (tile palette, eyedropper) and **collision painting** with an overlay
