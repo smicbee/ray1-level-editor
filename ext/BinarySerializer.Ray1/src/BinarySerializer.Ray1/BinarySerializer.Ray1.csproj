@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>9</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BinarySerializer.PlayStation\src\BinarySerializer.PlayStation.csproj" />
+    <ProjectReference Include="..\..\..\BinarySerializer\src\BinarySerializer.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+using Ray1LevelEditor; using BinarySerializer.Ray1;
+// usage: EditTest <TestCopy Rayman dir> <world> <level>   -- edits the TEST COPY only. Sky platform variant.
+var root=args[0]; int w=int.Parse(args[1]), l=int.Parse(args[2]);
+if (root.Contains("Rayman Forever\\") && !root.Contains("Editor Test")) { Console.WriteLine("refusing to touch original"); return 2; }
+var d=LevelDoc.Open(root,w,l);
+var ray=d.Objs.First(o=>o.D.Type==ObjType.TYPE_RAY_POS);
+Console.WriteLine($"RAY_POS at {ray.D.XPosition},{ray.D.YPosition}; objs {d.Objs.Count}; map {d.W}x{d.H}");
+ushort solidTile=0; foreach(var c in d.Cells){ if(c.Type==15 && c.Tile!=0){solidTile=c.Tile;break;} }
+int oldX=ray.D.XPosition, oldY=ray.D.YPosition;
+// move start 160px up and 64px right, build a 9-wide solid platform under the new start
+ray.D.XPosition=(short)(oldX+64); ray.D.YPosition=(short)(oldY-160);
+ray.D.InitialXPosition=(short)ray.D.XPosition; ray.D.InitialYPosition=(short)ray.D.YPosition;
+int cx=ray.D.XPosition/16, cy=ray.D.YPosition/16+6;
+for(int i=-3;i<=5;i++){ int x=cx+i; if(x<0||x>=d.W||cy>=d.H)continue; var c=d.Cells[cy*d.W+x]; c.Tile=solidTile; c.Type=15; c.Render=d.RenderModeFor(solidTile); d.Cells[cy*d.W+x]=c; }
+Console.WriteLine($"SKY platform row {cy} cols {cx-3}..{cx+5}, tile {solidTile}, ray {ray.D.XPosition},{ray.D.YPosition}");
+d.Save();
+var d2=LevelDoc.Open(root,w,l);
+Console.WriteLine($"reload: ray {d2.Objs.First(o=>o.D.Type==ObjType.TYPE_RAY_POS).D.XPosition},{d2.Objs.First(o=>o.D.Type==ObjType.TYPE_RAY_POS).D.YPosition} cell {d2.Cells[cy*d2.W+cx].Tile}/{d2.Cells[cy*d2.W+cx].Type}");
+return 0;

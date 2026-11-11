@@ -1,0 +1,31 @@
+using BinarySerializer; using BinarySerializer.Ray1; using BinarySerializer.Ray1.PC;
+var dir = args[0];
+Context Mk(int w,int l){var c=new Context(dir); c.AddSettings(new Ray1Settings(Ray1EngineVersion.PC,(World)w,l,Ray1PCVersion.PC_1_21)); return c;}
+var ctx=Mk(1,1);
+string rel="PCMAP/JUNGLE/RAY1.LEV"; ctx.AddFile(new LinearFile(ctx,rel));
+var lev=FileFactory.Read<LevelFile>(ctx,rel);
+var ts=lev.TileSetNormal; var mb=ts.MapBlocks;
+Console.WriteLine($"map {lev.MapInfo.Width}x{lev.MapInfo.Height} total {ts.TotalBlocksCount} opaque {ts.OpaqueBlocksCount} tsOff {ts.Offset.FileOffset} mbOff {mb.Offset.FileOffset} fond {lev.FondIndex}/{lev.ScrollDiffFondIndex} objs {lev.ObjData.ObjectsCount}");
+Console.WriteLine("table[0..6] "+string.Join(",",ts.BlocksOffsetTable.Take(7)));
+Console.WriteLine("opaque offs: "+string.Join(",",mb.OpaqueBlocks.Take(4).Select(b=>b.Offset.FileOffset-mb.Offset.FileOffset)) + " | trans: "+string.Join(",",mb.TransparentBlocks.Take(3).Select(b=>b.Offset.FileOffset-mb.Offset.FileOffset)));
+Console.WriteLine("blocksize opaque="+(mb.OpaqueBlocks[1].Offset.FileOffset-mb.OpaqueBlocks[0].Offset.FileOffset));
+var tb=mb.TransparentBlocks[1]; Console.WriteLine("alpha distinct "+string.Join(",",tb.Alpha.Distinct().Take(6))+" tm "+tb.TransparencyMode.ToString("X"));
+Console.WriteLine("max table "+ts.BlocksOffsetTable.Max()+" distinct "+ts.BlocksOffsetTable.Distinct().Count());
+int idm=0; for(int i=0;i<lev.ObjData.Objects.Length;i++) if(lev.ObjData.Objects[i].Id!=i) idm++;
+Console.WriteLine("Id!=index: "+idm+"/"+lev.ObjData.Objects.Length);
+foreach(var o in lev.ObjData.Objects.Take(6)) Console.WriteLine($"{o.Type} x{o.XPosition} y{o.YPosition} des{o.PCPacked_SpritesIndex}/{o.PCPacked_AnimationsIndex}/{o.PCPacked_ImageBufferIndex} eta{o.PCPacked_ETAIndex} st{o.MainEtat}/{o.SubEtat} hp{o.HitPoints} cmds{o.CommandsCount} flip{o.FlipX} init {o.InitialXPosition},{o.InitialYPosition} id{o.Id}");
+Console.WriteLine("links: "+string.Join(",",lev.ObjData.ObjectLinkingTable.Take(20)));
+var tc = lev.MapInfo.Blocks.GroupBy(b=>b.RenderMode).Select(g=>g.Key+":"+g.Count()); Console.WriteLine(string.Join(" ",tc));
+// render mode vs tile classification
+var offToCls=new Dictionary<uint,string>();
+foreach(var b in mb.OpaqueBlocks) offToCls[(uint)(b.Offset.FileOffset-mb.Offset.FileOffset)]="O";
+foreach(var b in mb.TransparentBlocks) offToCls[(uint)(b.Offset.FileOffset-mb.Offset.FileOffset)]="T";
+var cmp=lev.MapInfo.Blocks.GroupBy(b=> (b.TileIndex==0?"t0":"") + (offToCls.TryGetValue(ts.BlocksOffsetTable[b.TileIndex],out var c)?c:"?") +"->"+b.RenderMode).Select(g=>g.Key+"="+g.Count());
+Console.WriteLine(string.Join(" ",cmp));
+var wctx=Mk(1,1); wctx.AddFile(new LinearFile(wctx,"PCMAP/ALLFIX.DAT")); wctx.AddFile(new LinearFile(wctx,"PCMAP/RAY1.WLD"));
+var fix=FileFactory.Read<AllfixFile>(wctx,"PCMAP/ALLFIX.DAT"); var wld=FileFactory.Read<WorldFile>(wctx,"PCMAP/RAY1.WLD");
+Console.WriteLine($"fix des {fix.DesItems.Length} eta {fix.Eta.Length}; wld des {wld.DesItems.Length} eta {wld.Eta.Length}; ray des {fix.DESIndex_Ray}");
+var d=fix.DesItems[0]; Console.WriteLine($"des1 sprites {d.Sprites.Length} anims {d.Animations.Length} img {d.ImageData.Length} animated {d.IsAnimatedSprite}");
+Console.WriteLine("blocks 0..12: "+string.Join(" ",lev.MapInfo.Blocks.Skip(80*20).Take(16).Select(b=>$"[{b.TileIndex},{(int)b.BlockType},{(int)b.RenderMode}]")));
+Console.WriteLine("distinct tileidx "+lev.MapInfo.Blocks.Select(b=>b.TileIndex).Distinct().Count()+" max "+lev.MapInfo.Blocks.Max(b=>b.TileIndex));
+Console.WriteLine("pal0 first "+string.Join(",",lev.MapInfo.Palettes[0].Take(3).Select(c=>$"{c.R},{c.G},{c.B}"))+" npal "+lev.MapInfo.Palettes.Length);

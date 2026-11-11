@@ -1,0 +1,10 @@
+bin/
+obj/
+publish/
+pub_new/
+*.old
+*.user
+*.suo
+.vs/
+*.zip
+ext/*/.git/
